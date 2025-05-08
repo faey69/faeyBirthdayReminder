@@ -1,15 +1,37 @@
+<script setup>
+import { ref } from 'vue'
+import BirthdayCard from './components/BirthdayCard.vue'
+import BirthdayModal from './components/BirthdayModal.vue'
+
+const showBirthdayModal = ref(false)
+
+const birthdays = ref([])
+</script>
+
 <template>
   <div class="min-h-screen bg-gray-100">
     <!-- Header -->
-    <header class="bg-pink-700 p-4 text-center text-white">
-      <h1 class="text-2xl font-semibold">Faey Birthday Reminder</h1>
+    <header class="flex items-center justify-between bg-pink-700 p-4 text-white">
+      <h2 class="text-2xl font-semibold">Faey Birthday Reminder</h2>
+      <div>
+        <button
+          @click="showBirthdayModal = true"
+          class="flex h-10 w-10 items-center justify-center rounded-full bg-white hover:bg-pink-100"
+          aria-label="Add new birthday"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 -960 960 960"
+            class="h-8 w-8 fill-pink-700"
+          >
+            <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+          </svg>
+        </button>
+      </div>
     </header>
 
     <!-- Main Content Area -->
     <div class="mx-auto max-w-4xl py-6">
-      <!-- Add Birthday Button -->
-      <AddBirthdayButton @open-modal="openModal" />
-
       <!-- Birthday Cards Grid -->
       <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <!-- Loop through birthdays and display them in cards -->
@@ -18,36 +40,13 @@
     </div>
 
     <!-- Birthday Modal -->
-    <BirthdayModal :isOpen="isModalOpen" @close-modal="closeModal" @save-birthday="addBirthday" />
+    <Teleport to="body">
+      <!-- use the modal component, pass in the prop -->
+      <BirthdayModal :show="showBirthdayModal" @close="showBirthdayModal = false">
+        <template #header>New Birthday Entry</template>
+      </BirthdayModal>
+    </Teleport>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue'
-import AddBirthdayButton from './components/AddBirthdayButton.vue'
-import BirthdayCard from './components/BirthdayCard.vue'
-import BirthdayModal from './components/BirthdayModal.vue'
-
-// Reactive state for managing the modal visibility
-const isModalOpen = ref(false)
-
-// Reactive state to store the list of birthdays
-const birthdays = ref([])
-
-// Function to open the modal
-const openModal = () => {
-  isModalOpen.value = true
-}
-
-// Function to close the modal
-const closeModal = () => {
-  isModalOpen.value = false
-}
-
-// Function to add a new birthday
-const addBirthday = (newBirthday) => {
-  birthdays.value.push(newBirthday)
-}
-</script>
 
 <style scoped></style>
