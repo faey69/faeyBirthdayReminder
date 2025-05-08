@@ -1,11 +1,15 @@
 <script setup>
 import { ref } from 'vue'
-import { db } from '../firebase'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from './../firebase'
+import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore'
+import { watchEffect } from 'vue'
 
-// eslint-disable-next-line no-unused-vars
 const props = defineProps({
   show: Boolean,
+  birthdayToEdit: {
+    type: Object,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['close'])
@@ -15,7 +19,23 @@ const birthMonth = ref('')
 const birthDay = ref('')
 const notes = ref('')
 const tags = ref([])
-const newTag = ref('')
+const newTag = ref('') // Tag being added
+
+watchEffect(() => {
+  if (props.birthdayToEdit) {
+    name.value = props.birthdayToEdit.name || ''
+    birthMonth.value = props.birthdayToEdit.birthMonth || ''
+    birthDay.value = props.birthdayToEdit.birthDay || ''
+    notes.value = props.birthdayToEdit.notes || ''
+    tags.value = [...(props.birthdayToEdit.tags || [])]
+  } else {
+    name.value = ''
+    birthMonth.value = ''
+    birthDay.value = ''
+    notes.value = ''
+    tags.value = []
+  }
+})
 
 const addTag = () => {
   const trimmedTag = newTag.value.trim()
@@ -30,7 +50,7 @@ const removeTag = (tag) => {
 }
 
 const submitForm = async () => {
-  const newBirthday = {
+  const birthdayData = {
     name: name.value,
     birthMonth: birthMonth.value,
     birthDay: birthDay.value,
@@ -40,20 +60,21 @@ const submitForm = async () => {
   }
 
   try {
-    const docRef = await addDoc(collection(db, 'birthdays'), newBirthday)
-    console.log('Document written with ID: ', docRef.id)
+    if (props.birthdayToEdit) {
+      const docRef = doc(db, 'birthdays', props.birthdayToEdit.id)
+      await updateDoc(docRef, birthdayData)
+      console.log('Document updated')
+    } else {
+      birthdayData.createdAt = serverTimestamp()
+      await addDoc(collection(db, 'birthdays'), birthdayData)
+      console.log('New document created')
+    }
 
-    // Reset form fields
-    name.value = ''
-    birthMonth.value = ''
-    birthDay.value = ''
-    notes.value = ''
-    tags.value = []
-
+    emit('refresh')
     emit('close')
   } catch (e) {
-    console.error('Error adding document: ', e)
-    alert('Failed to submit birthday')
+    console.error('Error saving document: ', e)
+    alert('Failed to save birthday')
   }
 }
 </script>
@@ -113,6 +134,7 @@ const submitForm = async () => {
           <div class="mt-4">
             <label for="notes" class="block text-sm font-medium">Notes</label>
             <textarea
+              rows="4"
               v-model="notes"
               id="notes"
               class="mt-2 w-full rounded-md border border-gray-300 px-4 py-2"

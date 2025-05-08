@@ -10,11 +10,18 @@ const getMonthName = (monthNumber) => {
 }
 </script>
 <template>
-  <div class="m-2 rounded-lg bg-white p-4 shadow-md">
+  <div
+    class="m-2 cursor-pointer rounded-lg bg-white p-4 shadow-md outline outline-transparent transition-all duration-150 ease-in-out hover:bg-pink-50 hover:shadow-lg hover:outline-pink-300 active:bg-pink-100 active:shadow-lg"
+    @mousedown.prevent
+  >
     <h3 class="text-xl font-semibold">{{ birthday.name }}</h3>
-    <div class="flex gap-2">
-      <p class="text-sm font-bold text-gray-900">{{ getMonthName(birthday.birthMonth) }}</p>
-      <p class="text-sm text-gray-600">{{ birthday.birthDay }}</p>
+    <div class="mt-2 flex gap-2">
+      <p class="text-md rounded-lg px-2 font-bold text-pink-800 outline outline-pink-900">
+        {{ getMonthName(birthday.birthMonth) }}
+      </p>
+      <p class="text-md rounded-full px-2 font-semibold text-pink-600 outline outline-pink-900">
+        {{ birthday.birthDay }}
+      </p>
     </div>
     <p class="mt-2 truncate">{{ birthday.notes }}</p>
     <!-- Display each tag as a styled badge -->

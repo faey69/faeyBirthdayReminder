@@ -8,6 +8,7 @@ import { collection, getDocs } from 'firebase/firestore'
 const showBirthdayModal = ref(false)
 
 const birthdays = ref([])
+const selectedBirthday = ref(null)
 
 async function getCollection() {
   const colRef = collection(db, 'birthdays')
@@ -18,8 +19,16 @@ async function getCollection() {
     ...doc.data(),
   }))
 }
-
 getCollection()
+
+const openBirthdayModal = (birthday = null) => {
+  selectedBirthday.value = birthday
+  showBirthdayModal.value = true
+}
+
+const refreshBirthdays = async () => {
+  await getCollection()
+}
 </script>
 
 <template>
@@ -49,15 +58,30 @@ getCollection()
       <!-- Birthday Cards Grid -->
       <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <!-- Loop through birthdays and display them in cards -->
-        <BirthdayCard v-for="birthday in birthdays" :key="birthday.name" :birthday="birthday" />
+        <BirthdayCard
+          v-for="birthday in birthdays"
+          :key="birthday.name"
+          :birthday="birthday"
+          @click="openBirthdayModal(birthday)"
+        />
       </div>
     </div>
 
     <!-- Birthday Modal -->
     <Teleport to="body">
       <!-- use the modal component, pass in the prop -->
-      <BirthdayModal :show="showBirthdayModal" @close="showBirthdayModal = false">
-        <template #header>New Birthday Entry</template>
+      <BirthdayModal
+        :show="showBirthdayModal"
+        :birthdayToEdit="selectedBirthday"
+        @close="
+          () => {
+            showBirthdayModal = false
+            selectedBirthday = null
+          }
+        "
+        @refresh="refreshBirthdays"
+      >
+        <template #header>{{ selectedBirthday ? 'Edit Birthday' : 'New Birthday Entry' }}</template>
       </BirthdayModal>
     </Teleport>
   </div>
