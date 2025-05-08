@@ -1,9 +1,14 @@
 <script setup>
 import { ref } from 'vue'
+import { db } from '../firebase'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 
+// eslint-disable-next-line no-unused-vars
 const props = defineProps({
   show: Boolean,
 })
+
+const emit = defineEmits(['close'])
 
 const name = ref('')
 const birthMonth = ref('')
@@ -13,9 +18,9 @@ const tags = ref([])
 const newTag = ref('')
 
 const addTag = () => {
-  const trimmed = newTag.value.trim()
-  if (trimmed && !tags.value.includes(trimmed)) {
-    tags.value.push(trimmed)
+  const trimmedTag = newTag.value.trim()
+  if (trimmedTag && !tags.value.includes(trimmedTag)) {
+    tags.value.push(trimmedTag)
   }
   newTag.value = ''
 }
@@ -24,13 +29,31 @@ const removeTag = (tag) => {
   tags.value = tags.value.filter((t) => t !== tag)
 }
 
-const submitForm = () => {
+const submitForm = async () => {
   const newBirthday = {
     name: name.value,
     birthMonth: birthMonth.value,
     birthDay: birthDay.value,
     notes: notes.value,
     tags: tags.value,
+    createdAt: serverTimestamp(),
+  }
+
+  try {
+    const docRef = await addDoc(collection(db, 'birthdays'), newBirthday)
+    console.log('Document written with ID: ', docRef.id)
+
+    // Reset form fields
+    name.value = ''
+    birthMonth.value = ''
+    birthDay.value = ''
+    notes.value = ''
+    tags.value = []
+
+    emit('close')
+  } catch (e) {
+    console.error('Error adding document: ', e)
+    alert('Failed to submit birthday')
   }
 }
 </script>

@@ -2,10 +2,24 @@
 import { ref } from 'vue'
 import BirthdayCard from './components/BirthdayCard.vue'
 import BirthdayModal from './components/BirthdayModal.vue'
+import { db } from './firebase'
+import { collection, getDocs } from 'firebase/firestore'
 
 const showBirthdayModal = ref(false)
 
 const birthdays = ref([])
+
+async function getCollection() {
+  const colRef = collection(db, 'birthdays')
+  const querySnapshot = await getDocs(colRef)
+
+  birthdays.value = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }))
+}
+
+getCollection()
 </script>
 
 <template>
@@ -31,9 +45,9 @@ const birthdays = ref([])
     </header>
 
     <!-- Main Content Area -->
-    <div class="mx-auto max-w-4xl py-6">
+    <div class="mx-auto max-w-4xl py-2">
       <!-- Birthday Cards Grid -->
-      <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <!-- Loop through birthdays and display them in cards -->
         <BirthdayCard v-for="birthday in birthdays" :key="birthday.name" :birthday="birthday" />
       </div>
