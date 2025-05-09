@@ -39,7 +39,7 @@ const refreshBirthdays = async () => {
       <div>
         <button
           @click="showBirthdayModal = true"
-          class="flex h-10 w-10 items-center justify-center rounded-full bg-white hover:bg-pink-100"
+          class="flex h-10 w-10 items-center justify-center rounded-full bg-white outline outline-transparent transition-all duration-150 ease-in-out hover:bg-pink-50 hover:outline-pink-300 active:bg-pink-100"
           aria-label="Add new birthday"
         >
           <svg
